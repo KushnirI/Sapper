@@ -1,6 +1,6 @@
 import {GameArea} from "./gameArea";
-import {Timer} from "./timer";
-import {MineCounter} from "./mineCounter";
+import {Timer} from "./timerAndMineCounter/timer";
+import {MineCounter} from "./timerAndMineCounter/mineCounter";
 import {config} from "./config";
 
 document.body.oncontextmenu = function(event) {
@@ -17,7 +17,6 @@ PIXI.loader
     .add("./src/images/sheet.json")
     .load(setup);
 
-export const renderLoop: any[] = [];
 export let gameArea: GameArea,
     textures: any,
     firstMoveDone: boolean,
@@ -32,15 +31,11 @@ function setup() {
     timer = new Timer(config.gameArea.width - 140, 15);
     mineCounter = new MineCounter(15, 15);
 
-    app.ticker.add(delta => gameLoop(delta));
 }
 
-function gameLoop(delta){
-    for(let i = 0; i < renderLoop.length; i++){
-        renderLoop[i].update(delta);
-    }
-}
-
-export function makeFirstMove(){
+/**
+ * set firstMoveDone to true
+ */
+export function makeFirstMoveDone(){
     firstMoveDone = true;
 }
