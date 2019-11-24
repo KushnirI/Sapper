@@ -30,7 +30,7 @@ export class NumOfMines extends PIXI.Text{
 
     /**
      * create and return array with PIXI.TextStyle
-     * return {Array} stylesArr array with PIXI.TextStyle
+     * @returns {Array} stylesArr array with PIXI.TextStyle
      */
     addStyles():PIXI.TextStyle[]{
         let stylesArr: PIXI.TextStyle[] = [];

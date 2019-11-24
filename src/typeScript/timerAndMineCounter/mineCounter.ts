@@ -27,8 +27,8 @@ export class MineCounter extends PIXI.Container{
 
 
         this.by({
-            "flagAdded": this.minusOne,
-            "flagRemoved": this.plusOne
+            flagAdded: this.minusOne,
+            flagRemoved: this.plusOne
         });
 
         this.addChild(this.text, this.sprite);

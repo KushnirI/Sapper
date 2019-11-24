@@ -1,6 +1,11 @@
 export class Rectangle extends PIXI.Graphics {
-    constructor(public x: number, public y:number, public width:number, public height:number, color: number = 0) {
+    constructor(x: number, y:number, width:number, height:number, color: number = 0) {
         super();
+
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
 
         this.lineStyle(1, 0x000000, 1);
         if(color){

@@ -35,7 +35,7 @@ export class Cell extends PIXI.Container{
         this.flagOrQuestion = new FlagOrQuestion(x, y, "flagBig.png");
 
         this.type = "empty";
-        this.interactive = true;
+
         this.opened = false;
         this.rightDown = false;
         this.leftDown = false;
@@ -45,7 +45,8 @@ export class Cell extends PIXI.Container{
         this.addChild(this.mine);
         this.addChild(this.stubCell);
         this.addChild(this.flagOrQuestion);
-
+        this.interactive = true;
+        this.hitArea = new PIXI.Rectangle(x - width/2, y - height/2, width, height);
     }
 
     /**
@@ -75,6 +76,7 @@ export class Cell extends PIXI.Container{
      */
     makeFirstMove(){
         this.type = "start";
+        this.opened = true;
 
         makeFirstMoveDone();
         this.fireEvent("firstMove", config.minesAmount);
@@ -107,14 +109,19 @@ export class Cell extends PIXI.Container{
      * on right mouse button click add/remove "flag" or "question" and disable/enable stubCell
      */
     rightclick() {
-        this.addFlagOrQuestion();
+        if(!this.opened){
+            this.addFlagOrQuestion();
+        }
     }
 
     mousedown(){
         if(this.opened){
             this.leftDown = true;
+
             if(this.rightDown){
-                this.openNeighbors();
+                if(this.getFlaggedNeighborsNum() === this.number.minesNum){
+                    this.openNeighbors();
+                }
             }
         }
     }
@@ -126,8 +133,11 @@ export class Cell extends PIXI.Container{
     rightdown(){
         if(this.opened){
             this.rightDown = true;
+
             if(this.leftDown){
-                this.openNeighbors();
+                if(this.getFlaggedNeighborsNum() === this.number.minesNum){
+                    this.openNeighbors();
+                }
             }
         }
 
@@ -163,9 +173,9 @@ export class Cell extends PIXI.Container{
      * open all neighboring cells which not opened yet
      */
     openNeighbors(){
-        this.neighbors.forEach( (neibor) =>{
-            if(!neibor.opened){
-                neibor.open();
+        this.neighbors.forEach( (neighbor) =>{
+            if(!neighbor.opened){
+                neighbor.open();
             }
         })
     }
@@ -180,7 +190,6 @@ export class Cell extends PIXI.Container{
         this.neighbors.forEach( neighbor => {
             neighbor.addOne();
         })
-
     }
 
     /**
@@ -200,6 +209,17 @@ export class Cell extends PIXI.Container{
      */
     removeInteractive(){
         this.interactive = false;
+    }
+
+    getFlaggedNeighborsNum ():number{
+        let num:number = 0;
+        this.neighbors.forEach( neighbor => {
+            if(!neighbor.stubCell.enabled){
+                num++
+            }
+        });
+
+        return num;
     }
 
 }

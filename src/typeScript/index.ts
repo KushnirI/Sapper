@@ -8,10 +8,17 @@ document.body.oncontextmenu = function(event) {
 };
 
 export const app = new PIXI.Application({
-    width: 440, height: 660, backgroundColor: 0xB2BABB, resolution: window.devicePixelRatio || 1,
+    width: 440, height: 670, backgroundColor: 0xB2BABB, resolution: window.devicePixelRatio || 1,
 });
-
 document.body.appendChild(app.view);
+
+app.renderer.view.style.position = "absolute";
+app.renderer.view.style.display = "block";
+
+scaleToWindow(app.renderer.view);
+window.addEventListener("resize", function () {
+    scaleToWindow(app.renderer.view);
+});
 
 PIXI.loader
     .add("./src/images/sheet.json")
@@ -38,4 +45,19 @@ function setup() {
  */
 export function makeFirstMoveDone(){
     firstMoveDone = true;
+}
+
+/**
+ * scale canvas to window size
+ * @param {Object} canvas
+ */
+function scaleToWindow(canvas) {
+    let scaleX, scaleY, scale;
+
+    scaleX = window.innerWidth / canvas.offsetWidth;
+    scaleY = window.innerHeight / canvas.offsetHeight;
+
+    scale = Math.min(scaleX, scaleY);
+    canvas.style.transformOrigin = "0 0";
+    canvas.style.transform = "scale(" + scale + ")";
 }
