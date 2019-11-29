@@ -1,12 +1,20 @@
-# Sapper 
-Sapper is a logic 2d game
-
+# Sapper
+Sapper (Miner) is a logic 2d game
+![GitHub Logo](/images/forReadme/start.PNG)
+ 
 ## Description
-It's necessary to open cells using the numerical hints indicating the number of mines in neighboring cells.
-When all not mined cells are opened you won. If you open mined cell, game over.
+The objective of the game is to clear a board containing hidden mines without detonating any of them, 
+using the numerical hints indicating the number of mines in neighboring cells. 
+The first opened cell cannot contain a bomb.
+![GitHub Logo](/images/forReadme/firstMove.PNG)
 
-## Contributing
-Pull requests and comets for project are welcome.
+You can mark cells containing mines by flags. If the number on hint, match the number of flagged neighboring cells. 
+You can open the rest of closed neighboring cells using simultaneously click of two mouse buttons on the hint.
+![GitHub Logo](/images/forReadme/flag.PNG)
+ 
+Game is over if you open mined cell. When all not mined cells are opened, you won. 
+Timer will be stopped showing the time spent on this attempt and you can try to solve the puzzle faster next time. 
+![GitHub Logo](/images/forReadme/over.png)
 
-## Project status
-Waiting for review
+ 
+

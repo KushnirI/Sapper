@@ -27,7 +27,7 @@ export class GameArea extends PIXI.Container{
 
         });
         this.availableFiledCounter = config.rowsAndColumns.rows * config.rowsAndColumns.columns - config.minesAmount;
-        // this.mineArr = this.addMines(config.minesAmount);
+
         this.position.set(x, y);
         this.addChild(this.area);
         app.stage.addChild(this);
@@ -153,7 +153,7 @@ export class GameArea extends PIXI.Container{
      */
     updateCounter():void {
         this.availableFiledCounter--;
-        console.log(this.availableFiledCounter);
+
         if(this.availableFiledCounter === 0){
             this.fireEvent("victory");
             this.removeInteractiveAll()
