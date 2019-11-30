@@ -3,31 +3,33 @@ import {Rectangle} from "./utils/rectangle";
 import {app} from "./index";
 import {Cell} from "./cell/cell";
 import {randomInt} from "./utils/utils";
-import {observableMixin} from "./eventHandlers/observableMixin";
+import {ObservableMixin, observableMixin} from "./eventHandlers/observableMixin";
 
-export class GameArea extends PIXI.Container{
-    area: any;
-    cellsArr: Cell[][];
-    mineArr: Cell[];
-    fireEvent: Function;
-    availableFiledCounter: number;
-    by: Function;
+export interface GameArea extends PIXI.Container, ObservableMixin {
+    area: Rectangle;
+    cells: Cell[][];
+    mines: Cell[];
+    availableCellsCount: number;
+}
 
-    constructor(x: number, y: number){
+export class GameArea extends PIXI.Container {
+    constructor(x: number, y: number) {
         super();
-        Object.assign(this, observableMixin);
-        this.area = new Rectangle(0,0, config.gameArea.width, config.gameArea.height);
-        this.cellsArr = this.addCells(config.rowsAndColumns.rows, config.rowsAndColumns.columns, config.fieldSize.width, config.fieldSize.height);
 
-        this.defineNeighboringCells(this.cellsArr);
+        Object.assign(this, observableMixin);
+
+        this.area = new Rectangle(0, 0, config.gameArea.width, config.gameArea.height);
+        this.cells = this.addCells(config.rows, config.columns, config.fieldSize.width, config.fieldSize.height);
+
+        this.defineNeighboringCells(this.cells);
+
         this.by({
             firstMove: this.addMines,
             explosion: this.gameOver,
-            filedOpened: this.updateCounter
-
+            cellOpened: this.updateAvailableCellsCount,
         });
-        this.availableFiledCounter = config.rowsAndColumns.rows * config.rowsAndColumns.columns - config.minesAmount;
 
+        this.availableCellsCount = config.rows * config.columns - config.minesAmount;
         this.position.set(x, y);
         this.addChild(this.area);
         app.stage.addChild(this);
@@ -41,20 +43,21 @@ export class GameArea extends PIXI.Container{
      * @param {Number} height cell's height
      * @returns {Array} 2d array of Cells
      */
-    addCells(rows:number, columns: number, width: number, height: number) : Cell[][]{
-        let arr2D: Cell[][] = [];
-        let x:number = width/2;
-        let y:number = height/2;
-        for(let i = 0; i < rows; i++) {
+    addCells(rows: number, columns: number, width: number, height: number): Cell[][] {
+        const arr2D: Cell[][] = [];
+        const x = width / 2;
+        const y = height / 2;
 
-            let arr: any[] = [];
-            for(let j = 0; j < columns; j++){
-                let filed = new Cell(x + width*j,y + height*i, width, height);
-                arr.push(filed);
-                this.addChild(filed);
+        for (let i = 0; i < rows; i++) {
+
+            const arr: Cell[] = [];
+            for (let j = 0; j < columns; j++) {
+                const cell = new Cell(x + width * j, y + height * i, width, height);
+                arr.push(this.addChild(cell));
             }
             arr2D.push(arr);
         }
+
         return arr2D;
     }
 
@@ -62,108 +65,105 @@ export class GameArea extends PIXI.Container{
      * For each cell define and add to cell.neighbors arr, neighboring cells
      * @param {Array} arr2D 2d array of cells
      */
-    defineNeighboringCells(arr2D:Cell[][]):void {
-        for(let i = 0; i < arr2D.length; i++){
+    defineNeighboringCells(arr2D: Cell[][]): void {
+        for (let i = 0; i < arr2D.length; i++) {
 
             let insideArr: Cell[];
             let previousArr: Cell[];
-            let nextArr:Cell[];
+            let nextArr: Cell[];
 
-
-            if(arr2D[i - 1]){
+            if (arr2D[i - 1]) {
                 previousArr = arr2D[i - 1];
             }
 
-            if(arr2D[i + 1]){
+            if (arr2D[i + 1]) {
                 nextArr = arr2D[i + 1];
             }
 
             insideArr = arr2D[i];
 
-            for(let j = 0; j < insideArr.length; j++){
-                let curFiled: Cell = insideArr[j];
-                let lineBefore:Cell;
-                let lineAfter:Cell;
+            for (let j = 0; j < insideArr.length; j++) {
+                const curFiled: Cell = insideArr[j];
+                let lineBefore: Cell;
+                let lineAfter: Cell;
 
-
-                if(insideArr[j - 1]){
-                    lineBefore = insideArr[j - 1]
+                if (insideArr[j - 1]) {
+                    lineBefore = insideArr[j - 1];
                 }
-                if(insideArr[j + 1]){
-                    lineAfter = insideArr[j + 1]
+                if (insideArr[j + 1]) {
+                    lineAfter = insideArr[j + 1];
                 }
 
-                if(previousArr){
-                    if(lineBefore){
-                        curFiled.neighbors.push(previousArr[j-1])
+                if (previousArr) {
+                    if (lineBefore) {
+                        curFiled.neighbors.push(previousArr[j - 1]);
                     }
-                    if(lineAfter){
-                        curFiled.neighbors.push(previousArr[j+1])
+                    if (lineAfter) {
+                        curFiled.neighbors.push(previousArr[j + 1]);
                     }
-                    curFiled.neighbors.push(previousArr[j])
+                    curFiled.neighbors.push(previousArr[j]);
                 }
 
-                if(nextArr){
-                    if(lineBefore){
-                        curFiled.neighbors.push(nextArr[j-1])
+                if (nextArr) {
+                    if (lineBefore) {
+                        curFiled.neighbors.push(nextArr[j - 1]);
                     }
-                    if(lineAfter){
-                        curFiled.neighbors.push(nextArr[j+1])
+                    if (lineAfter) {
+                        curFiled.neighbors.push(nextArr[j + 1]);
                     }
-                    curFiled.neighbors.push(nextArr[j])
+                    curFiled.neighbors.push(nextArr[j]);
                 }
 
-                if(lineBefore){
-                    curFiled.neighbors.push(insideArr[j-1])
+                if (lineBefore) {
+                    curFiled.neighbors.push(insideArr[j - 1]);
                 }
-                if(lineAfter){
-                    curFiled.neighbors.push(insideArr[j+1])
+                if (lineAfter) {
+                    curFiled.neighbors.push(insideArr[j + 1]);
                 }
             }
         }
     }
 
     /**
-     * randomly add mines to cells in cellsArr
+     * randomly add mines to cells in cells array
      * @param {Number} minesAmount amount of mines
      */
-    addMines(minesAmount:number):void{
-        let minesArr: Cell[] = [];
+    addMines(minesAmount: number): void {
+        const mines: Cell[] = [];
 
-        for(let i = 0; i < minesAmount; i++){
-            let row: number = randomInt(0, config.rowsAndColumns.rows-1);
-            let column: number = randomInt(0, config.rowsAndColumns.columns-1);
-            let cell: Cell = this.cellsArr[row][column];
+        for (let i = 0; i < minesAmount; i++) {
+            const row = randomInt(0, config.rows - 1);
+            const column = randomInt(0, config.columns - 1);
+            const cell = this.cells[row][column];
 
-            if(cell.type !== "mine" && cell.type !== "start"){
+            if (!["mine", "start"].includes(cell.type)) {
                 cell.addMine();
-                minesArr.push(cell)
+                mines.push(cell);
             } else {
                 i--;
             }
-
         }
-        this.mineArr = minesArr;
 
+        this.mines = mines;
     }
 
     /**
-     * on event "filedOpened" deduct availableFiledCounter
+     * on event "cellOpened" deduct availableCellsCount
      * if no more availableFiled left, fire event "victory"
      */
-    updateCounter():void {
-        this.availableFiledCounter--;
+    updateAvailableCellsCount(): void {
+        this.availableCellsCount--;
 
-        if(this.availableFiledCounter === 0){
+        if (this.availableCellsCount === 0) {
             this.fireEvent("victory");
-            this.removeInteractiveAll()
+            this.removeInteractiveAll();
         }
     }
 
     /**
-     * shows all mines and remove cells interactive
+     * shows all mines and remove cells interactiveness (the game is lost)
      */
-    gameOver():void{
+    gameOver(): void {
         this.explosion();
         this.removeInteractiveAll();
     }
@@ -171,23 +171,22 @@ export class GameArea extends PIXI.Container{
     /**
      * shows all mines
      */
-    explosion():void{
-        this.mineArr.forEach( cell => {
+    explosion(): void {
+        this.mines.forEach(cell => {
             cell.flagOrQuestion.visible = false;
             cell.type = "exploded";
             cell.stubCell.open();
-        })
+        });
     }
 
     /**
      * remove cells interactive
      */
-    removeInteractiveAll():void{
-        this.cellsArr.forEach( arr => {
-            arr.forEach( cell => {
-                cell.removeInteractive()
-            })
-        })
+    removeInteractiveAll(): void {
+        this.cells.forEach(arr => {
+            arr.forEach(cell => {
+                cell.removeInteractive();
+            });
+        });
     }
-
 }

@@ -1,21 +1,27 @@
 import {events} from "./events";
 
-export const observableMixin: {by: Function, fireEvent: Function} = {
+export interface ObservableMixin {
+    by: (params: {[key: string]: (...args: any[]) => void}) => void;
+    fireEvent: (eventName: string, ...args: any[]) => void;
+    eventHandlers?: {[eventName: string]: () => void};
+}
+
+export const observableMixin: ObservableMixin = {
     /**
      *
      * @param {object} params {Object.<string, function>}
      */
-    by : function (params: object): void {
-        if( !this.eventHandlers ){
+    by (params: {[key: string]: (...args: any[]) => void}): void {
+        if (!this.eventHandlers) {
             this.eventHandlers = {};
         }
 
-        for( let eventName in params) {
-            if( params.hasOwnProperty(eventName) ) {
-                if ( !this.eventHandlers[eventName]){
+        for (const eventName in params) {
+            if (params.hasOwnProperty(eventName)) {
+                if (!this.eventHandlers[eventName]) {
                     events.addListener(eventName, this);
                 }
-                this.eventHandlers[eventName] = params[eventName] ;
+                this.eventHandlers[eventName] = params[eventName];
             }
         }
     },
@@ -25,7 +31,7 @@ export const observableMixin: {by: Function, fireEvent: Function} = {
      * @param {string} eventName eventName
      * @param {array} args array with arguments
      */
-    fireEvent : function(eventName: string, ...args : any[]){
+    fireEvent (eventName: string, ...args: any[]): void {
         events.fireEvent(eventName, args);
-    }
+    },
 };

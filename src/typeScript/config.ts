@@ -1,15 +1,20 @@
-type ObjSize = {width: number, height: number};
-
-interface IConfig {
-    gameArea: ObjSize,
-    rowsAndColumns : {rows:number, columns: number},
-    minesAmount: number,
-    fieldSize: ObjSize
+interface ObjSize {
+    width: number;
+    height: number;
 }
 
-export const config : IConfig = {
+interface Config {
+    gameArea: ObjSize;
+    rows: number;
+    columns: number;
+    minesAmount: number;
+    fieldSize: ObjSize;
+}
+
+export const config: Config = {
     gameArea: {width: 400, height: 560},
-    rowsAndColumns: {columns:10, rows:14,},
+    columns: 10,
+    rows: 14,
     minesAmount: 15,
-    fieldSize: {width: 40, height: 40}
+    fieldSize: {width: 40, height: 40},
 };

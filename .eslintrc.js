@@ -1,6 +1,5 @@
 module.exports = {
 
-    // To use common sense we will follow gold standards
     extends: "eslint:recommended",
 
     root: true,

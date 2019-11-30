@@ -1,14 +1,20 @@
-export const events: {events:{}, addListener: Function, fireEvent: Function} = {
+import {ObservableMixin} from "./observableMixin";
 
-    events : {},
+export const events: {
+    events: {[eventName: string]: Array<{eventHandlers: ObservableMixin["eventHandlers"]}>},
+    addListener: (eventName: string, eventListener: object) => void,
+    fireEvent: (eventName: string, args: any[]) => void,
+} = {
+
+    events: {},
 
     /**
      *
      * @param {string} eventName Name of event
      * @param {object} eventListener object with callback function, which should be called on event
      */
-    addListener : function(eventName: string, eventListener: object):void {
-        if(!this.events[eventName]) {
+    addListener (eventName: string, eventListener: object): void {
+        if (!this.events[eventName]) {
             this.events[eventName] = [];
         }
         this.events[eventName].push(eventListener);
@@ -19,15 +25,13 @@ export const events: {events:{}, addListener: Function, fireEvent: Function} = {
      * @param {string} eventName Name of event
      * @param {array} args arguments for callback function
      */
-    fireEvent : function (eventName: string, args: any[]){
+    fireEvent(eventName: string, args: any[]): void {
         const listeners = this.events[eventName];
 
-        for(let i = 0; i < listeners.length; i++) {
-            const listener = listeners[i];
+        for (const listener of listeners) {
             const handler = listener.eventHandlers[eventName];
 
-            handler.apply(listener, args)
+            handler.apply(listener, args);
         }
-
-    }
+    },
 };
