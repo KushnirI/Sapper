@@ -3,84 +3,77 @@ import {NumOfMines} from "./numOfMines";
 import {StubCell} from "./stubCell";
 import {FlagOrQuestion} from "./flagOrQuestion";
 import {Mine} from "./mine";
-import {observableMixin} from "../eventHandlers/observableMixin";
-import {firstMoveDone, makeFirstMoveDone} from "../index";
+import {ObservableMixin, observableMixin} from "../eventHandlers/observableMixin";
+import {isFirstMoveDone, onFirstMoveDone} from "../index";
 import {config} from "../config";
 
-
-export class Cell extends PIXI.Container{
+export interface Cell extends PIXI.Container, ObservableMixin {
     rect: Rectangle;
     number: NumOfMines;
     stubCell: StubCell;
     flagOrQuestion: FlagOrQuestion;
-    neighbors: Cell[] = [];
+    neighbors: Cell[];
     mine: Mine;
-    type: string;
-    fireEvent: Function;
+    type: "empty" | "start" | "mine" | "number" | "exploded";
     opened: boolean;
     rightDown: boolean;
     leftDown: boolean;
+}
 
-
-
-
-    constructor(x: number, y: number, width: number, height: number){
+export class Cell extends PIXI.Container {
+    constructor(x: number, y: number, width: number, height: number) {
         super();
+
         Object.assign(this, observableMixin);
-        this.rect = new Rectangle(x - width/2, y - height/2, width, height);
-        this.number = new NumOfMines(x, y);
-        this.mine = new Mine(x, y, "mineBig.png");
+        this.rect = this.addChild(new Rectangle(x - width / 2, y - height / 2, width, height));
+        this.number = this.addChild(new NumOfMines(x, y));
+        this.mine = this.addChild(new Mine(x, y, "mineBig.png"));
 
-        this.stubCell = new StubCell(x, y,"field.PNG");
-        this.flagOrQuestion = new FlagOrQuestion(x, y, "flagBig.png");
-
+        this.stubCell = this.addChild(new StubCell(x, y, "field.PNG"));
+        this.flagOrQuestion = this.addChild(new FlagOrQuestion(x, y, "flagBig.png"));
         this.type = "empty";
 
+        this.neighbors = [];
         this.opened = false;
         this.rightDown = false;
         this.leftDown = false;
-
-        this.addChild(this.rect);
-        this.addChild(this.number);
-        this.addChild(this.mine);
-        this.addChild(this.stubCell);
-        this.addChild(this.flagOrQuestion);
         this.interactive = true;
-        this.hitArea = new PIXI.Rectangle(x - width/2, y - height/2, width, height);
+
+        this.hitArea = new PIXI.Rectangle(x - width / 2, y - height / 2, width, height);
     }
 
     /**
      * if all required conditions are met open stubCell
      */
-    open(){
-        if(this.stubCell.enabled){
-            if(!firstMoveDone){
-                this.makeFirstMove()
-            }
-
-            this.openStubCell();
-
-            if(this.type === "empty"){
-                this.openNeighbors();
-
-            } else if(this.type === "mine"){
-                this.fireEvent("explosion");
-                this.rect.addFill();
-            }
+    open() {
+        if (!this.stubCell.enabled) {
+            return;
         }
 
+        if (!isFirstMoveDone) {
+            this.makeFirstMove();
+        }
+
+        this.openStubCell();
+
+        if (this.type === "empty") {
+            this.openNeighbors();
+        } else if (this.type === "mine") {
+            this.fireEvent("explosion");
+            this.rect.addFill();
+        }
     }
 
     /**
      * fire event "firstMove"(start game)
      */
-    makeFirstMove(){
+    makeFirstMove() {
         this.type = "start";
         this.opened = true;
 
-        makeFirstMoveDone();
+        onFirstMoveDone();
         this.fireEvent("firstMove", config.minesAmount);
-        if(this.number.minesNum === 0){
+        if (this.number.minesNum === 0) {
             this.openNeighbors();
         }
     }
@@ -88,20 +81,19 @@ export class Cell extends PIXI.Container{
     /**
      * opens stubCell
      */
-    openStubCell(){
+    openStubCell() {
         this.stubCell.open();
         this.opened = true;
-        this.fireEvent("filedOpened");
+        this.fireEvent("cellOpened");
         this.flagOrQuestion.disable();
-
     }
 
     /**
      * on mouse click open cell, if it's not opened yet
      */
     click() {
-        if(!this.opened){
-            this.open()
+        if (!this.opened) {
+            this.open();
         }
     }
 
@@ -109,97 +101,118 @@ export class Cell extends PIXI.Container{
      * on right mouse button click add/remove "flag" or "question" and disable/enable stubCell
      */
     rightclick() {
-        if(!this.opened){
+        if (!this.opened) {
             this.addFlagOrQuestion();
         }
     }
 
-    mousedown(){
-        if(this.opened){
-            this.leftDown = true;
+    /**
+     * processes left mouse button down on given cell
+     */
+    mousedown() {
+        if (!this.opened) {
+            return;
+        }
 
-            if(this.rightDown){
-                if(this.getFlaggedNeighborsNum() === this.number.minesNum){
-                    this.openNeighbors();
-                }
+        this.leftDown = true;
+
+        if (this.rightDown) {
+            /*if all neighboring mines are marked open closed neighboring cells when both mouse buttons are clicked
+            simultaneously*/
+            if (this.getFlaggedNeighborsNum() === this.number.minesNum) {
+                this.openNeighbors();
             }
         }
     }
 
-    mouseup(){
+    /**
+     * processes left mouse button up on given cell
+     */
+    mouseup() {
         this.leftDown = false;
     }
 
-    rightdown(){
-        if(this.opened){
-            this.rightDown = true;
-
-            if(this.leftDown){
-                if(this.getFlaggedNeighborsNum() === this.number.minesNum){
-                    this.openNeighbors();
-                }
-            }
+    /**
+     * processes right mouse button down on given cell
+     */
+    rightdown() {
+        if (!this.opened) {
+            return;
         }
 
+        this.rightDown = true;
+
+        if (this.leftDown) {
+            /*if all neighboring mines are marked open closed neighboring cells when both mouse buttons are clicked
+            simultaneously*/
+            if (this.getFlaggedNeighborsNum() === this.number.minesNum) {
+                this.openNeighbors();
+            }
+        }
     }
 
-    rightup(){
+    /**
+     * processes right mouse button up on given cell
+     */
+    rightup() {
         this.rightDown = false;
     }
 
     /**
      * depending on conditions add/remove "flag" or "question" and disable/enable stubCell
      */
-    addFlagOrQuestion():void{
-        if(!this.flagOrQuestion.enabled){
-            //stub
-        } else if(!this.flagOrQuestion.visible){
+    addFlagOrQuestion(): void {
+        if (!this.flagOrQuestion.enabled) {
+            return;
+        }
+
+        if (!this.flagOrQuestion.visible) {
             this.fireEvent("flagAdded");
             this.flagOrQuestion.visible = true;
             this.stubCell.enabled = false;
 
-        } else if( this.flagOrQuestion.type === "flag") {
+        } else if (this.flagOrQuestion.type === "flag") {
             this.flagOrQuestion.changeType();
             this.fireEvent("flagRemoved");
 
         } else {
             this.flagOrQuestion.visible = false;
             this.stubCell.enabled = true;
-            this.flagOrQuestion.changeType()
+            this.flagOrQuestion.changeType();
         }
     }
 
     /**
      * open all neighboring cells which not opened yet
      */
-    openNeighbors(){
-        this.neighbors.forEach( (neighbor) =>{
-            if(!neighbor.opened){
+    openNeighbors() {
+        this.neighbors.forEach(neighbor => {
+            if (!neighbor.opened) {
                 neighbor.open();
             }
-        })
+        });
     }
 
     /**
      * add mine and make plus one to cell.number of neighboring cells
      */
-    addMine(){
+    addMine() {
         this.type = "mine";
         this.number.hide();
         this.mine.show();
-        this.neighbors.forEach( neighbor => {
+        this.neighbors.forEach(neighbor => {
             neighbor.addOne();
-        })
+        });
     }
 
     /**
      * if conditions are met add plus one to cell.number
      */
     addOne() {
-        if(this.type !== "mine"){
+        if (this.type !== "mine") {
             this.number.addOne();
-            if(this.type !== "start"){
-                this.type = "number"
+            if (this.type !== "start") {
+                this.type = "number";
             }
         }
     }
@@ -207,19 +220,18 @@ export class Cell extends PIXI.Container{
     /**
      * removes interactive
      */
-    removeInteractive(){
+    removeInteractive() {
         this.interactive = false;
     }
 
-    getFlaggedNeighborsNum ():number{
-        let num:number = 0;
-        this.neighbors.forEach( neighbor => {
-            if(!neighbor.stubCell.enabled){
-                num++
+    getFlaggedNeighborsNum(): number {
+        let num = 0;
+        this.neighbors.forEach(neighbor => {
+            if (!neighbor.stubCell.enabled) {
+                num++;
             }
         });
 
         return num;
     }
-
 }
