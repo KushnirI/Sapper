@@ -20,9 +20,9 @@ export class Timer extends PIXI.Container{
         this.minutes = 0;
 
         this.by({
-            "firstMove": this.start,
-            "explosion": this.stop,
-            "victory": this.stop
+            firstMove: this.start,
+            explosion: this.stop,
+            victory: this.stop
         });
 
         this.addChild(this.text, this.sprite);

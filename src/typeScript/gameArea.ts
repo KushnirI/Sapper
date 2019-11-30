@@ -17,17 +17,17 @@ export class GameArea extends PIXI.Container{
         super();
         Object.assign(this, observableMixin);
         this.area = new Rectangle(0,0, config.gameArea.width, config.gameArea.height);
-        this.cellsArr = this.addCells(config.rowsAndColumns.rows, config.rowsAndColumns.colums, config.fieldSize.width, config.fieldSize.height);
+        this.cellsArr = this.addCells(config.rowsAndColumns.rows, config.rowsAndColumns.columns, config.fieldSize.width, config.fieldSize.height);
 
         this.defineNeighboringCells(this.cellsArr);
         this.by({
-            "firstMove": this.addMines,
-            "explosion": this.gameOver,
-            "filedOpened": this.updateCounter
+            firstMove: this.addMines,
+            explosion: this.gameOver,
+            filedOpened: this.updateCounter
 
         });
-        this.availableFiledCounter = config.rowsAndColumns.rows * config.rowsAndColumns.colums - config.minesAmount;
-        // this.mineArr = this.addMines(config.minesAmount);
+        this.availableFiledCounter = config.rowsAndColumns.rows * config.rowsAndColumns.columns - config.minesAmount;
+
         this.position.set(x, y);
         this.addChild(this.area);
         app.stage.addChild(this);
@@ -36,19 +36,19 @@ export class GameArea extends PIXI.Container{
     /**
      * add cells to 2d array
      * @param {Number} rows amount of rows
-     * @param {Number} colums amount of colums
+     * @param {Number} columns amount of columns
      * @param {Number} width cell's width
      * @param {Number} height cell's height
-     * return {Array} 2d array of Cells
+     * @returns {Array} 2d array of Cells
      */
-    addCells(rows:number, colums: number, width: number, height: number) : Cell[][]{
+    addCells(rows:number, columns: number, width: number, height: number) : Cell[][]{
         let arr2D: Cell[][] = [];
         let x:number = width/2;
         let y:number = height/2;
         for(let i = 0; i < rows; i++) {
 
             let arr: any[] = [];
-            for(let j = 0; j < colums; j++){
+            for(let j = 0; j < columns; j++){
                 let filed = new Cell(x + width*j,y + height*i, width, height);
                 arr.push(filed);
                 this.addChild(filed);
@@ -132,8 +132,8 @@ export class GameArea extends PIXI.Container{
 
         for(let i = 0; i < minesAmount; i++){
             let row: number = randomInt(0, config.rowsAndColumns.rows-1);
-            let colum: number = randomInt(0, config.rowsAndColumns.colums-1);
-            let cell: Cell = this.cellsArr[row][colum];
+            let column: number = randomInt(0, config.rowsAndColumns.columns-1);
+            let cell: Cell = this.cellsArr[row][column];
 
             if(cell.type !== "mine" && cell.type !== "start"){
                 cell.addMine();
@@ -152,9 +152,9 @@ export class GameArea extends PIXI.Container{
      * if no more availableFiled left, fire event "victory"
      */
     updateCounter():void {
-        console.log(this.availableFiledCounter);
         this.availableFiledCounter--;
-        if(this.availableFiledCounter < 0){
+
+        if(this.availableFiledCounter === 0){
             this.fireEvent("victory");
             this.removeInteractiveAll()
         }
@@ -174,7 +174,7 @@ export class GameArea extends PIXI.Container{
     explosion():void{
         this.mineArr.forEach( cell => {
             cell.flagOrQuestion.visible = false;
-            cell.type = "exploaded";
+            cell.type = "exploded";
             cell.stubCell.open();
         })
     }

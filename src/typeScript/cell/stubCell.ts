@@ -1,8 +1,6 @@
 import {textures} from "../index";
 import {config} from "../config";
 
-
-
 export class StubCell extends PIXI.Sprite {
     enabled: boolean;
 
