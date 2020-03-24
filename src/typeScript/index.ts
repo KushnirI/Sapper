@@ -3,6 +3,7 @@ import {Timer} from "./topBar/timer";
 import {MineCounter} from "./topBar/mineCounter";
 import {config} from "./config";
 import {scaleToWindow} from "./utils/utils";
+import {PIXIScalableText} from "./PIXIScalableText";
 
 // Ensuring no context menu on right mouse button click
 document.body.oncontextmenu = event => {
@@ -31,6 +32,8 @@ export let textures: any;
 export let isFirstMoveDone: boolean;
 export let timer: Timer;
 export let mineCounter: MineCounter;
+// export let scalableText: PIXIScalableText;
+// export let style: PIXI.TextStyle;
 
 function setup() {
     textures = PIXI.loader.resources["./src/images/sheet.json"].textures;
@@ -39,6 +42,12 @@ function setup() {
     isFirstMoveDone = false;
     timer = new Timer(config.gameArea.width - 140, 15);
     mineCounter = new MineCounter(15, 15);
+    /*style = new PIXI.TextStyle({
+        fontFamily: "Arial",
+        fontSize: 33,
+        fill: "blue",
+    })
+    scalableText = new PIXIScalableText("teteteteaate", style, 500);*/
 }
 
 /**
