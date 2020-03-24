@@ -1,10 +1,11 @@
 import {app, textures} from "../index";
 import {ObservableMixin, observableMixin} from "../eventHandlers/observableMixin";
 import {config} from "../config";
+import {PIXIScalableText} from "../PIXIScalableText";
 
 export interface MineCounter extends PIXI.Container, ObservableMixin {
-    sprite: PIXI.Sprite;
-    text: PIXI.Text;
+    // sprite: PIXI.Sprite;
+    text: PIXIScalableText;
     textStyle: PIXI.TextStyle;
     minesAmount: number;
 }
@@ -15,8 +16,10 @@ export class MineCounter extends PIXI.Container {
 
         Object.assign(this, observableMixin);
 
-        this.sprite = this.addSprite("flagBig.png");
+        // this.sprite = this.addSprite("flagBig.png");
         this.minesAmount = config.minesAmount;
+
+        // @ts-ignore
         this.text = this.addText("" + this.minesAmount);
 
         this.by({
@@ -25,7 +28,7 @@ export class MineCounter extends PIXI.Container {
         });
 
         this.position.set(x, y);
-        this.addChild(this.text, this.sprite);
+        this.addChild(this.text);
         app.stage.addChild(this);
     }
 
@@ -50,11 +53,11 @@ export class MineCounter extends PIXI.Container {
     addText(txt: string): PIXI.Text {
         const textStyle: PIXI.TextStyle = new PIXI.TextStyle({
             fontFamily: "Arial",
-            fontSize: 36,
+            fontSize: 77,
             fill: "midnightblue",
         });
-        const text: PIXI.Text = new PIXI.Text(txt, textStyle);
-        text.position.set(70, 10);
+        const text: PIXIScalableText = new PIXIScalableText(txt + "test", textStyle, 300);
+        text.position.set(170, 50);
         return text;
     }
 
@@ -63,7 +66,8 @@ export class MineCounter extends PIXI.Container {
      */
     minusOne(): void {
         this.minesAmount--;
-        this.text.text = "" + this.minesAmount;
+        let text = "" + this.minesAmount+ "long text lalala";
+        this.text.setText(text)
     }
 
     /**
@@ -71,6 +75,7 @@ export class MineCounter extends PIXI.Container {
      */
     plusOne(): void {
         this.minesAmount++;
-        this.text.text = "" + this.minesAmount;
+        let text = "" + this.minesAmount+ "some text";
+        this.text.setText(text)
     }
 }
