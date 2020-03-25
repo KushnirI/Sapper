@@ -5,6 +5,4 @@ let justForCommit = 1;
 dfsdfsfsdfs
 
 df
-fd
-isFirstMoveDonedf
-departFocus(df)
+
