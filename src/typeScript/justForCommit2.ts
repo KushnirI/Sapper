@@ -1,5 +1,3 @@
-import {isFirstMoveDone} from "./index";
-
 let justForCommit = 5;
-let justForCommit = 5.2;
+let justForCommit1 = 5.2;
 
