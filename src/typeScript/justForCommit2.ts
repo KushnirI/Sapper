@@ -1,4 +1,4 @@
 import {isFirstMoveDone} from "./index";
 
-let justForCommit = 1;
+let justForCommit = 5;
 
