@@ -1,3 +1,3 @@
-let justForCommit = 5;
-let justForCommit1 = 5.2;
+let justForCommit = 6;
+let justForCommit1 = 6.2;
 
